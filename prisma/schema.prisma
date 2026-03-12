@@ -1,0 +1,167 @@
+// ChargeReserve — Prisma Schema (Neon PostgreSQL)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ─────────────────────────────────────────────
+
+enum Role {
+  USER
+  OPERATOR
+  ADMIN
+}
+
+enum StationStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  INACTIVE
+}
+
+enum ChargerType {
+  CCS
+  CHADEMO
+  TYPE2
+  J1772
+}
+
+enum ChargerStatus {
+  AVAILABLE
+  BOOKED
+  IN_USE
+  MAINTENANCE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// ─── Models ────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  password     String
+  role         Role      @default(USER)
+  phone        String?
+  vehicleType  String?
+  isSuspended  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  stations     Station[]
+  bookings     Booking[]
+  payments     Payment[]
+}
+
+model Station {
+  id             String        @id @default(uuid())
+  name           String
+  address        String
+  city           String
+  country        String
+  latitude       Float
+  longitude      Float
+  totalChargers  Int           @default(0)
+  operatorId     String
+  operator       User          @relation(fields: [operatorId], references: [id])
+  rating         Float?
+  amenities      String[]
+  operatingHours String        @default("24/7")
+  status         StationStatus @default(PENDING_APPROVAL)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  chargers       Charger[]
+
+  @@index([latitude, longitude])
+  @@index([operatorId])
+  @@index([city])
+  @@index([status])
+}
+
+model Charger {
+  id           String        @id @default(uuid())
+  stationId    String
+  station      Station       @relation(fields: [stationId], references: [id], onDelete: Cascade)
+  type         ChargerType
+  powerKw      Float
+  pricePerKwh  Float
+  status       ChargerStatus @default(AVAILABLE)
+  createdAt    DateTime      @default(now())
+
+  bookings     Booking[]
+
+  @@index([stationId])
+}
+
+model Booking {
+  id         String        @id @default(uuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id])
+  chargerId  String
+  charger    Charger       @relation(fields: [chargerId], references: [id])
+  startTime  DateTime
+  endTime    DateTime
+  status     BookingStatus @default(CONFIRMED)
+  qrCode     String        @unique @default(uuid())
+  pin        String?
+  totalCost  Float?
+  createdAt  DateTime      @default(now())
+
+  session    ChargingSession?
+  payment    Payment?
+
+  @@index([userId])
+  @@index([chargerId])
+  @@index([status])
+  @@index([startTime, endTime])
+}
+
+model ChargingSession {
+  id          String        @id @default(uuid())
+  bookingId   String        @unique
+  booking     Booking       @relation(fields: [bookingId], references: [id])
+  energyUsed  Float         @default(0)
+  cost        Float         @default(0)
+  duration    Int           @default(0)
+  startTime   DateTime      @default(now())
+  endTime     DateTime?
+  status      SessionStatus @default(ACTIVE)
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  bookingId     String        @unique
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  amount        Float
+  paymentMethod String
+  transactionId String        @unique @default(uuid())
+  status        PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+
+  @@index([userId])
+}
