@@ -76,12 +76,12 @@ async function main() {
   // ── Stations ─────────────────────────────────────────
   const station1 = await prisma.station.create({
     data: {
-      name: "Downtown EV Hub",
-      address: "123 Main Street",
-      city: "Singapore",
-      country: "Singapore",
-      latitude: 1.3521,
-      longitude: 103.8198,
+      name: "Connaught Place EV Hub",
+      address: "Inner Circle, Connaught Place",
+      city: "New Delhi",
+      country: "India",
+      latitude: 28.6304,
+      longitude: 77.2177,
       operatorId: operator1.id,
       rating: 4.7,
       amenities: ["WiFi", "Restrooms", "Cafe", "Parking"],
@@ -93,12 +93,12 @@ async function main() {
 
   const station2 = await prisma.station.create({
     data: {
-      name: "Marina Bay Charge Point",
-      address: "10 Bayfront Avenue",
-      city: "Singapore",
-      country: "Singapore",
-      latitude: 1.2835,
-      longitude: 103.8607,
+      name: "Bandra Kurla Complex Charge Point",
+      address: "Bandra Kurla Complex",
+      city: "Mumbai",
+      country: "India",
+      latitude: 19.0596,
+      longitude: 72.8647,
       operatorId: operator1.id,
       rating: 4.5,
       amenities: ["WiFi", "Shopping Mall", "Parking"],
@@ -110,12 +110,12 @@ async function main() {
 
   const station3 = await prisma.station.create({
     data: {
-      name: "Orchard Road Supercharger",
-      address: "238 Orchard Road",
-      city: "Singapore",
-      country: "Singapore",
-      latitude: 1.3048,
-      longitude: 103.8318,
+      name: "Koramangala Supercharger",
+      address: "80 Feet Road, Koramangala",
+      city: "Bangalore",
+      country: "India",
+      latitude: 12.9345,
+      longitude: 77.6212,
       operatorId: operator2.id,
       rating: 4.8,
       amenities: ["WiFi", "Shopping", "Restrooms", "Lounge"],
@@ -127,12 +127,12 @@ async function main() {
 
   const station4 = await prisma.station.create({
     data: {
-      name: "Changi Airport Charge Hub",
-      address: "1 Airport Boulevard",
-      city: "Singapore",
-      country: "Singapore",
-      latitude: 1.3644,
-      longitude: 103.9915,
+      name: "Hyderabad Tech Park Charge Hub",
+      address: "HITEC City",
+      city: "Hyderabad",
+      country: "India",
+      latitude: 17.4435,
+      longitude: 78.3772,
       operatorId: operator2.id,
       rating: 4.9,
       amenities: ["WiFi", "Restaurants", "Shops", "Lounge", "Parking"],
@@ -144,12 +144,12 @@ async function main() {
 
   const station5 = await prisma.station.create({
     data: {
-      name: "Jurong West EV Station",
-      address: "50 Jurong Gateway Road",
-      city: "Singapore",
-      country: "Singapore",
-      latitude: 1.3329,
-      longitude: 103.7436,
+      name: "Aundh EV Station",
+      address: "Aundh, Pune",
+      city: "Pune",
+      country: "India",
+      latitude: 18.5583,
+      longitude: 73.8075,
       operatorId: operator1.id,
       rating: 4.3,
       amenities: ["Parking", "Restrooms"],
