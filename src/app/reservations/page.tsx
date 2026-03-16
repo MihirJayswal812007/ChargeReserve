@@ -152,12 +152,13 @@ export default async function ReservationsPage() {
           <div className="bg-card border rounded-2xl overflow-hidden shadow-sm">
             <div className="divide-y divide-border">
               {past.map((booking) => (
-                <div
+                <Link
+                  href={`/session/${booking.id}`}
                   key={booking.id}
-                  className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group"
+                  className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <Zap className="w-5 h-5 text-primary" />
                     </div>
                     <div>
@@ -176,7 +177,7 @@ export default async function ReservationsPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right flex items-center gap-4">
+                  <div className="text-right flex items-center gap-4 shrink-0">
                     {booking.session && (
                       <div className="hidden sm:block text-sm">
                         <div className="font-medium">
@@ -192,7 +193,7 @@ export default async function ReservationsPage() {
                     )}
                     <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

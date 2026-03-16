@@ -4,6 +4,8 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "sonner";
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -15,19 +17,26 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen antialiased selection:bg-primary/30 selection:text-primary flex flex-col`}>
-        <Navbar />
-        <div className="flex-1 flex flex-col">
-          {children}
-        </div>
-        <Toaster
-          position="top-right"
-          theme="dark"
-          toastOptions={{
-            style: { background: "#111", border: "1px solid rgba(255,255,255,0.1)", color: "#fff" },
-          }}
-        />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Navbar />
+          <div className="flex-1 flex flex-col">
+            {children}
+          </div>
+          <Toaster
+            position="top-right"
+            theme="system"
+            toastOptions={{
+              className: "dark:bg-[#111] dark:border-white/10 dark:text-white bg-white border-black/10 text-black",
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

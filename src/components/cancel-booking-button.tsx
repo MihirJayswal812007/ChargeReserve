@@ -19,8 +19,9 @@ export default function CancelBookingButton({ bookingId }: { bookingId: string }
       if (!res.ok) throw new Error(data.error ?? "Failed to cancel");
       toast.success("Reservation cancelled");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

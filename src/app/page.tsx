@@ -1,6 +1,8 @@
 import LandingPageClient from "@/components/landing-page-client";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export default async function LandingPage() {
   // Fetch latest 6 active stations with availability summary
   const stations = await prisma.station.findMany({

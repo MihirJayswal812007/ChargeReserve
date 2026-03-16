@@ -44,3 +44,16 @@ next-env.d.ts
 
 # Obsidian planning directory
 /planning/
+
+# diagnostic and log files
+*_log.txt
+*_output.txt
+*_report.txt
+ts_errors.txt
+ts_errors_utf8.txt
+lint_output.txt
+lint_output_utf8.txt
+build_log.txt
+build_output.txt
+eslint_report.txt
+test-api.js

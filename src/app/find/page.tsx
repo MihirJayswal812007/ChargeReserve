@@ -6,7 +6,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
   Search, MapPin, Zap, Filter, SlidersHorizontal, Star,
-  ChevronRight, Loader2, Clock, X,
+  ChevronRight, Loader2, Clock, X, LocateFixed,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,7 @@ interface Station {
   totalChargers: number;
   chargers: Charger[];
   availableCount: number;
+  distance?: number | null;
 }
 
 const CHARGER_TYPES = ["All", "CCS", "CHADEMO", "TYPE2", "J1772"];
@@ -75,14 +76,25 @@ export default function FindPage() {
   const [minPower, setMinPower] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selected, setSelected] = useState<Station | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [radius, setRadius] = useState<number>(50); // Default 50km
 
   const fetchStations = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (search) params.set("city", search);
+      if (search && !userLocation) params.set("city", search);
       if (selectedType !== "All") params.set("type", selectedType);
       if (minPower) params.set("minPower", minPower);
+      if (userLocation) {
+        params.set("lat", userLocation.lat.toString());
+        params.set("lng", userLocation.lng.toString());
+        params.set("radius", radius.toString());
+      }
+      params.set("limit", "500");
       const res = await fetch(`/api/stations?${params}`);
       const data = await res.json();
       setStations(data.stations ?? []);
@@ -91,9 +103,59 @@ export default function FindPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, selectedType, minPower]);
+  }, [search, selectedType, minPower, userLocation, radius]);
+
+  const handleUseLocation = () => {
+    if ("geolocation" in navigator) {
+      setLocating(true);
+      setLocationError(null);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setSearch("");
+          setLocating(false);
+        },
+        () => {
+          setLocationError("Location access denied or unavailable.");
+          setLocating(false);
+        },
+        { timeout: 10000, maximumAge: 60000 }
+      );
+    } else {
+      setLocationError("Geolocation is not supported by your browser.");
+    }
+  };
+
+  const handleGeocode = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!search.trim()) {
+      setUserLocation(null);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(search)}&limit=1`, {
+        headers: { "Accept-Language": "en", "User-Agent": "ChargeReserve/1.0" }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        setUserLocation({ lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+      } else {
+        setUserLocation(null); // fallback to text text filtering
+      }
+    } catch (err) {
+      console.error(err);
+      setUserLocation(null);
+    }
+    // Note: setting userLocation triggers fetchStations via useEffect
+  };
 
   useEffect(() => {
+    // If not geocoded yet, we still fetch normally when dependencies change.
+    // If they press Enter, handleGeocode updates userLocation which triggers this.
     const t = setTimeout(fetchStations, 300);
     return () => clearTimeout(t);
   }, [fetchStations]);
@@ -110,21 +172,24 @@ export default function FindPage() {
     <div className="flex flex-col h-[calc(100vh-64px)]">
       {/* Top bar */}
       <div className="border-b bg-background/95 backdrop-blur px-4 py-3 flex items-center gap-3 sticky top-0 z-10">
-        <div className="relative flex-1">
+        <form onSubmit={handleGeocode} className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search by city…"
+            placeholder="Search city, address, or zip code and hit Enter…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              if (e.target.value === "") setUserLocation(null);
+            }}
             className="w-full bg-secondary border-0 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:outline-none"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <button type="button" onClick={() => { setSearch(""); setUserLocation(null); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
             </button>
           )}
-        </div>
+        </form>
         <Button
           variant={showFilters ? "default" : "outline"}
           size="sm"
@@ -132,8 +197,35 @@ export default function FindPage() {
           className="gap-1.5 shrink-0"
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
-          Filters
+          Filters {(selectedType !== "All" || minPower) ? "(Active)" : ""}
         </Button>
+      </div>
+
+      {/* Location / Radius helper below top bar */}
+      <div className="bg-background border-b px-4 py-2 flex items-center justify-between gap-3 text-sm">
+        <button 
+          onClick={handleUseLocation} 
+          disabled={locating}
+          className="flex items-center gap-1.5 text-primary font-medium hover:underline text-xs disabled:opacity-60"
+        >
+          {locating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <LocateFixed className="w-3.5 h-3.5" />}
+          {locating ? "Detecting…" : "Use my location"}
+        </button>
+        {locationError && <span className="text-xs text-red-500">{locationError}</span>}
+        {userLocation && !locationError && (
+          <div className="flex items-center gap-2 flex-1 max-w-xs ml-auto">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">Radius: {radius} km</span>
+            <input
+              type="range"
+              min="2"
+              max="200"
+              step="1"
+              value={radius}
+              onChange={(e) => setRadius(parseInt(e.target.value))}
+              className="w-full accent-primary h-1 bg-secondary rounded-lg appearance-none cursor-pointer"
+            />
+          </div>
+        )}
       </div>
 
       {/* Filters panel */}
@@ -209,10 +301,10 @@ export default function FindPage() {
                 {stations.length} station{stations.length !== 1 ? "s" : ""} found
               </div>
               {stations.map((s) => (
-                <button
+                <Link
                   key={s.id}
-                  onClick={() => setSelected(s)}
-                  className={`w-full text-left p-4 hover:bg-secondary/50 transition-colors ${
+                  href={`/station/${s.id}`}
+                  className={`block w-full text-left p-4 hover:bg-secondary/50 transition-colors ${
                     selected?.id === s.id ? "bg-secondary/70 border-l-2 border-l-primary" : ""
                   }`}
                 >
@@ -228,6 +320,11 @@ export default function FindPage() {
                       </span>
                     )}
                   </div>
+                  {s.distance != null && (
+                    <p className="text-xs font-semibold text-primary mb-1">
+                      {s.distance.toFixed(1)} kms away
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
                     <MapPin className="w-3 h-3" /> {s.city}
                   </p>
@@ -243,7 +340,7 @@ export default function FindPage() {
                       </span>
                     )}
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           )}
@@ -255,6 +352,8 @@ export default function FindPage() {
             stations={stations}
             selectedStation={selected}
             onSelectStation={setSelected}
+            userLocation={userLocation}
+            radiusKm={radius}
           />
 
           {/* Floating Detail Panel inside the map area */}

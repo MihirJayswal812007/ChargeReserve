@@ -34,8 +34,7 @@ export default function RegisterPage() {
         return;
       }
       toast.success("Account created! Welcome aboard 🎉");
-      router.push("/dashboard");
-      router.refresh();
+      window.location.assign("/dashboard");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -44,29 +43,29 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-background px-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#7b5ea7]/5 blur-[120px]" />
       </div>
 
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-md my-12">
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00e5ff] to-[#7b5ea7] flex items-center justify-center shadow-lg shadow-[#00e5ff]/20 group-hover:shadow-[#00e5ff]/40 transition-shadow">
               <Zap className="w-5 h-5 text-black" fill="currentColor" />
             </div>
-            <span className="text-xl font-bold text-white">ChargeReserve</span>
+            <span className="text-xl font-bold text-foreground">ChargeReserve</span>
           </Link>
         </div>
 
-        <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 backdrop-blur-sm shadow-2xl">
-          <h1 className="text-2xl font-bold text-white mb-1">Create account</h1>
-          <p className="text-white/50 text-sm mb-8">Start reserving EV charging slots in seconds</p>
+        <div className="bg-card/50 border border-border/50 rounded-2xl p-8 backdrop-blur-sm shadow-xl dark:bg-white/[0.03] dark:border-white/10 dark:shadow-2xl">
+          <h1 className="text-2xl font-bold text-foreground mb-1">Create account</h1>
+          <p className="text-muted-foreground text-sm mb-8">Start reserving EV charging slots in seconds</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white/70 text-sm">Full name</Label>
+              <Label htmlFor="name" className="text-muted-foreground text-sm">Full name</Label>
               <Input
                 id="name"
                 type="text"
@@ -75,12 +74,12 @@ export default function RegisterPage() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50 h-11"
+                className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground/50 focus:border-[#00e5ff]/50 h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70 text-sm">Email address</Label>
+              <Label htmlFor="email" className="text-muted-foreground text-sm">Email address</Label>
               <Input
                 id="email"
                 type="email"
@@ -89,12 +88,12 @@ export default function RegisterPage() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50 h-11"
+                className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground/50 focus:border-[#00e5ff]/50 h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/70 text-sm">Password</Label>
+              <Label htmlFor="password" className="text-muted-foreground text-sm">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -105,12 +104,12 @@ export default function RegisterPage() {
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required
                   minLength={8}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50 h-11 pr-10"
+                  className="bg-background/50 border-input text-foreground placeholder:text-muted-foreground/50 focus:border-[#00e5ff]/50 h-11 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -126,7 +125,7 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-white/40">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link href="/login" className="text-[#00e5ff] hover:underline font-medium">
               Sign in

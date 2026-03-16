@@ -1,14 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-// GET /api/stations?city=&type=&minPower=&page=&limit=
+function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const city = searchParams.get("city") ?? undefined;
-  const type = searchParams.get("type") ?? undefined; // ChargerType enum
+  const type = searchParams.get("type") ?? undefined;
   const minPower = searchParams.get("minPower");
+  const latStr = searchParams.get("lat");
+  const lngStr = searchParams.get("lng");
+  const radiusStr = searchParams.get("radius") || "50";
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
-  const limit = Math.min(50, parseInt(searchParams.get("limit") ?? "20"));
+  const limit = Math.min(500, parseInt(searchParams.get("limit") ?? "50"));
+
+  const userLat = latStr ? parseFloat(latStr) : null;
+  const userLng = lngStr ? parseFloat(lngStr) : null;
+  const radiusKm = parseFloat(radiusStr);
 
   try {
     const stations = await prisma.station.findMany({
@@ -19,6 +38,7 @@ export async function GET(req: NextRequest) {
           ? {
               chargers: {
                 some: {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   ...(type ? { type: type as any } : {}),
                   ...(minPower ? { powerKw: { gte: parseFloat(minPower) } } : {}),
                 },
@@ -38,19 +58,21 @@ export async function GET(req: NextRequest) {
         },
         operator: { select: { id: true, name: true } },
       },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: { createdAt: "desc" },
     });
 
-    // Compute per-station availability summary
-    const result = stations.map((s) => {
+    let result = stations.map((s) => {
       const available = s.chargers.filter((c) => c.status === "AVAILABLE").length;
       const maxPower = s.chargers.reduce((m, c) => Math.max(m, c.powerKw), 0);
       const minPrice = s.chargers.reduce(
         (m, c) => Math.min(m, c.pricePerKwh),
         Infinity
       );
+      
+      let distance = null;
+      if (userLat !== null && userLng !== null) {
+        distance = getDistanceInKm(userLat, userLng, s.latitude, s.longitude);
+      }
+
       return {
         id: s.id,
         name: s.name,
@@ -66,13 +88,28 @@ export async function GET(req: NextRequest) {
         operator: s.operator,
         totalChargers: s.totalChargers,
         availableChargers: available,
+        availableCount: available,
+        chargers: s.chargers,
         maxPowerKw: maxPower,
         minPricePerKwh: minPrice === Infinity ? null : minPrice,
         chargerTypes: [...new Set(s.chargers.map((c) => c.type))],
+        distance,
       };
     });
 
-    return NextResponse.json({ stations: result, page, limit });
+    // Handle distance filtering and sorting
+    if (userLat !== null && userLng !== null) {
+      result = result.filter((s) => s.distance !== null && s.distance <= radiusKm);
+      result.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    } else {
+      // Provide default stable sort if no location is given
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    // Apply pagination post-filtering
+    const paginatedResult = result.slice((page - 1) * limit, page * limit);
+
+    return NextResponse.json({ stations: paginatedResult, page, limit, total: result.length });
   } catch (err) {
     console.error("[GET /api/stations]", err);
     return NextResponse.json({ error: "Failed to fetch stations" }, { status: 500 });

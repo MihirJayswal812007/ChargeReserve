@@ -25,6 +25,7 @@ import { prisma } from "@/lib/db";
 export default async function OperatorDashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+  if (user.role !== "OPERATOR" && user.role !== "ADMIN") redirect("/dashboard");
 
   // Fetch stations owned by the user
   const stations = await prisma.station.findMany({
@@ -149,10 +150,6 @@ export default async function OperatorDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₹{totalEarnings.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground mt-1 flex items-center">
-              <TrendingUp className="w-3 h-3 mr-1 text-emerald-500" />
-              <span className="text-emerald-500 font-medium">+12.5%</span> from last month
-            </p>
           </CardContent>
         </Card>
         

@@ -27,22 +27,53 @@ interface Station {
   totalChargers: number;
   chargers: Charger[];
   availableCount: number;
+  distance?: number | null;
 }
 
 interface StationMapProps {
   stations: Station[];
   selectedStation: Station | null;
   onSelectStation: (station: Station) => void;
+  userLocation?: { lat: number; lng: number } | null;
+  radiusKm?: number;
+}
+
+function createGeoJSONCircle(center: [number, number], radiusInKm: number, points = 64) {
+  const coords = { latitude: center[1], longitude: center[0] };
+  const ret = [];
+  const distanceX = radiusInKm / (111.32 * Math.cos((coords.latitude * Math.PI) / 180));
+  const distanceY = radiusInKm / 110.574;
+
+  let theta, x, y;
+  for (let i = 0; i < points; i++) {
+    theta = (i / points) * (2 * Math.PI);
+    x = distanceX * Math.cos(theta);
+    y = distanceY * Math.sin(theta);
+    ret.push([coords.longitude + x, coords.latitude + y]);
+  }
+  ret.push(ret[0]);
+
+  return {
+    type: "Feature" as const,
+    properties: {},
+    geometry: {
+      type: "Polygon" as const,
+      coordinates: [ret],
+    },
+  };
 }
 
 export default function StationMap({
   stations,
   selectedStation,
   onSelectStation,
+  userLocation,
+  radiusKm,
 }: StationMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<{ [id: string]: maplibregl.Marker }>({});
+  const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -60,6 +91,35 @@ export default function StationMap({
       });
 
       map.current.addControl(new maplibregl.NavigationControl(), "top-right");
+
+      map.current.on("load", () => {
+        if (!map.current) return;
+        map.current.addSource("radius-source", {
+          type: "geojson",
+          data: { type: "FeatureCollection", features: [] },
+        });
+
+        map.current.addLayer({
+          id: "radius-layer",
+          type: "fill",
+          source: "radius-source",
+          paint: {
+            "fill-color": "#3b82f6",
+            "fill-opacity": 0.15,
+          },
+        });
+
+        map.current.addLayer({
+          id: "radius-outline",
+          type: "line",
+          source: "radius-source",
+          paint: {
+            "line-color": "#3b82f6",
+            "line-width": 2,
+            "line-opacity": 0.5,
+          },
+        });
+      });
     } else {
       // Update style if theme changes
       map.current.setStyle(`https://basemaps.cartocdn.com/gl/${isDark ? "dark-matter" : "positron"}-gl-style/style.json`);
@@ -106,15 +166,69 @@ export default function StationMap({
       }
     });
 
-    // Fit bounds if we have stations
-    if (stations.length > 0 && map.current) {
+    // Fit bounds if we have stations or userLocation
+    if (map.current) {
       const bounds = new maplibregl.LngLatBounds();
-      stations.forEach(s => {
+      let hasBounds = false;
+
+      if (userLocation) {
+        bounds.extend([userLocation.lng, userLocation.lat]);
+        // Also extend roughly by radius to keep circle in view
+        if (radiusKm) {
+          const latDiff = radiusKm / 110.574;
+          const lngDiff = radiusKm / (111.32 * Math.cos((userLocation.lat * Math.PI) / 180));
+          bounds.extend([userLocation.lng - lngDiff, userLocation.lat - latDiff]);
+          bounds.extend([userLocation.lng + lngDiff, userLocation.lat + latDiff]);
+        }
+        hasBounds = true;
+      }
+
+      stations.forEach((s) => {
         bounds.extend([s.longitude, s.latitude]);
+        hasBounds = true;
       });
-      map.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+
+      if (hasBounds) {
+        map.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+      }
     }
-  }, [stations, onSelectStation]);
+  }, [stations, onSelectStation, userLocation, radiusKm]);
+
+  // Handle userLocation marker and radius circle
+  useEffect(() => {
+    if (!map.current) return;
+
+    if (userLocation) {
+      if (!userMarkerRef.current) {
+        const el = document.createElement("div");
+        el.className = `w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg ring-4 ring-blue-500/30 animate-pulse`;
+        userMarkerRef.current = new maplibregl.Marker({ element: el })
+          .setLngLat([userLocation.lng, userLocation.lat])
+          .addTo(map.current);
+      } else {
+        userMarkerRef.current.setLngLat([userLocation.lng, userLocation.lat]);
+      }
+
+      if (radiusKm && map.current.isStyleLoaded() && map.current.getSource("radius-source")) {
+        const circle = createGeoJSONCircle([userLocation.lng, userLocation.lat], radiusKm);
+        (map.current.getSource("radius-source") as maplibregl.GeoJSONSource).setData({
+          type: "FeatureCollection",
+          features: [circle],
+        });
+      }
+    } else {
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      if (map.current.isStyleLoaded() && map.current.getSource("radius-source")) {
+        (map.current.getSource("radius-source") as maplibregl.GeoJSONSource).setData({
+          type: "FeatureCollection",
+          features: [],
+        });
+      }
+    }
+  }, [userLocation, radiusKm, theme]);
 
   // Optional: Center map on selected station
   useEffect(() => {

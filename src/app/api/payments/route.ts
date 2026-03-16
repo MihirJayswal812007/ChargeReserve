@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth"
 import { JwtPayload } from "jsonwebtoken"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
-  apiVersion: "2025-02-24.acacia" as Parameters<typeof import("stripe").default>[1]["apiVersion"], // eslint-disable-line @typescript-eslint/no-explicit-any
+  apiVersion: "2023-10-16" as any, // eslint-disable-line @typescript-eslint/no-explicit-any
 })
 
 export async function POST(req: Request) {

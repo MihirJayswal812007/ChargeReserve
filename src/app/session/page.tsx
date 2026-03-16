@@ -2,18 +2,43 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { PlugZap, QrCode, Keyboard, ArrowRight } from "lucide-react";
+import { PlugZap, QrCode, Keyboard, ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SessionEntry() {
   const router = useRouter();
   const [stationId, setStationId] = useState("");
   const [method, setMethod] = useState<"qr" | "manual">("manual");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (stationId) {
-      router.push(`/session/${stationId}`);
+    if (!stationId) return;
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/bookings");
+      if (!res.ok) throw new Error("Failed to load bookings");
+      const data = await res.json();
+      
+      const isMatch = (id?: string) => id && id.trim().toLowerCase() === stationId.trim().toLowerCase();
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const activeBooking = data.bookings?.find((b: any) => 
+        (isMatch(b.charger?.station?.id) || isMatch(b.charger?.id) || isMatch(b.id)) &&
+        (b.status === "CONFIRMED" || b.status === "ACTIVE")
+      );
+
+      if (activeBooking) {
+        router.push(`/session/${activeBooking.id}`);
+      } else {
+        toast.error("No active reservation found for this station ID.");
+      }
+    } catch (err) {
+      toast.error("Error verifying station.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -74,10 +99,19 @@ export default function SessionEntry() {
               <button
                 type="submit"
                 className="w-full bg-primary text-primary-foreground font-semibold py-3 rounded-xl hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-                disabled={!stationId}
+                disabled={!stationId || isLoading}
               >
-                Connect to Station
-                <ArrowRight className="w-4 h-4" />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    Connect to Station
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             </form>
           ) : (

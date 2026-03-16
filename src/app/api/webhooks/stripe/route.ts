@@ -5,7 +5,8 @@ import Stripe from "stripe"
 import { prisma } from "@/lib/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
-  apiVersion: "2025-02-24.acacia" as any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  apiVersion: "2023-10-16" as any,
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -15,22 +16,19 @@ export async function POST(req: Request) {
     const rawBody = await req.text()
     const signature = (await headers()).get("stripe-signature")
 
-    if (!webhookSecret) {
-      // In dev environment without webhook secret, just accept it
-      return NextResponse.json({ received: true })
-    }
-
-    if (!signature) {
-      return NextResponse.json({ error: "No signature found" }, { status: 400 })
-    }
-
     let event: Stripe.Event
 
-    try {
-      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
-    } catch (err: any) {
-      console.error(`Webhook signature verification failed: ${err.message}`)
-      return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 })
+    if (webhookSecret && signature) {
+      try {
+        event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret)
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error(`Webhook signature verification failed: ${errorMessage}`)
+        return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 400 })
+      }
+    } else {
+      // In dev environment without webhook secret, just accept it and parse the body directly
+      event = JSON.parse(rawBody) as Stripe.Event
     }
 
     if (event.type === 'checkout.session.completed') {
@@ -58,7 +56,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ received: true })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Webhook error:", err)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }

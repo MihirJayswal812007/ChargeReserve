@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
-
+import { prisma } from "@/lib/db";
 const JWT_SECRET = process.env.JWT_SECRET!;
 const COOKIE_NAME = "cr_token";
 
@@ -46,7 +46,22 @@ export async function getTokenFromCookie(): Promise<string | null> {
 export async function getCurrentUser(): Promise<JwtPayload | null> {
   const token = await getTokenFromCookie();
   if (!token) return null;
-  return verifyToken(token);
+  const payload = verifyToken(token);
+  if (!payload) return null;
+
+  // Verify the user still exists in the database and is not suspended
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { isSuspended: true },
+    });
+    if (!dbUser || dbUser.isSuspended) return null;
+  } catch (err) {
+    console.error("[getCurrentUser db check]", err);
+    return null;
+  }
+
+  return payload;
 }
 
 export function setAuthCookie(token: string): {

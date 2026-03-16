@@ -29,8 +29,9 @@ interface SessionData {
 interface BookingData {
   id: string;
   status: string;
-  charger: { powerKw: number; pricePerKwh: number; type: string };
-  station: { name: string; address: string };
+  startTime: string;
+  endTime: string;
+  charger: { powerKw: number; pricePerKwh: number; type: string; station: { name: string; address: string } };
   session: SessionData | null;
 }
 
@@ -41,12 +42,6 @@ function fmt(secs: number) {
   const s = secs % 60;
   if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-function batteryFromEnergy(kwh: number, powerKw: number) {
-  // rough estimate: assume 75 kWh battery, start at 20%
-  const pct = 20 + (kwh / 75) * 100;
-  return Math.min(pct, 100);
 }
 
 export default function ChargingSession() {
@@ -63,7 +58,7 @@ export default function ChargingSession() {
   const [cost, setCost] = useState(0);
   const [power, setPower] = useState(0);
 
-  const startedAt = useRef<number>(Date.now());
+  const startedAt = useRef<number>(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const patchIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -75,6 +70,7 @@ export default function ChargingSession() {
         const res = await fetch("/api/bookings");
         if (res.status === 401) { router.push("/login"); return; }
         const data = await res.json();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bk: BookingData = data.bookings?.find((b: any) => b.id === bookingId) ?? null;
 
         if (!bk) { setStage("error"); return; }
@@ -212,9 +208,12 @@ export default function ChargingSession() {
   // ── Ring math ─────────────────────────────────────────
   const radius = 120;
   const circumference = 2 * Math.PI * radius;
+  const totalBookedDurationSeconds = booking
+    ? (new Date(booking.endTime).getTime() - new Date(booking.startTime).getTime()) / 1000
+    : 1;
   const batteryPct = booking
-    ? batteryFromEnergy(energyUsed, booking.charger.powerKw)
-    : 20;
+    ? Math.min((elapsed / totalBookedDurationSeconds) * 100, 100)
+    : 0;
   const strokeDashoffset = circumference - (batteryPct / 100) * circumference;
 
   const stageColor: Record<Stage, string> = {
@@ -246,7 +245,7 @@ export default function ChargingSession() {
           {booking && (
             <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
               <MapPin className="w-3.5 h-3.5" />
-              {booking.station.name}
+              {booking.charger.station.name}
             </p>
           )}
         </div>
@@ -308,7 +307,7 @@ export default function ChargingSession() {
                 <span className="text-2xl text-muted-foreground">%</span>
               </span>
               <span className="text-sm text-muted-foreground flex items-center gap-1">
-                <Battery className="w-4 h-4" /> State of Charge
+                <Battery className="w-4 h-4" /> Session Progress
               </span>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -110,6 +111,10 @@ export async function POST(req: NextRequest) {
 
       return b;
     });
+
+    // Revalidate paths to ensure fresh data in client navigations
+    revalidatePath("/dashboard");
+    revalidatePath("/reservations");
 
     return NextResponse.json(
       {

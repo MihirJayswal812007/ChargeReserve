@@ -48,9 +48,11 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="hidden sm:flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <Settings className="w-4 h-4 mr-2" />
-            Settings
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/settings">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </Link>
           </Button>
         </div>
       </div>
@@ -63,7 +65,7 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Active Reservations</h2>
               <Link
-                href="/"
+                href="/find"
                 className="text-sm font-medium text-primary hover:underline"
               >
                 New Booking
@@ -74,7 +76,7 @@ export default async function DashboardPage() {
               <div className="text-center py-12 border border-dashed border-border rounded-2xl text-muted-foreground">
                 <Zap className="w-8 h-8 mx-auto mb-3 opacity-30" />
                 <p>No active reservations.</p>
-                <Link href="/" className="mt-4 inline-block">
+                <Link href="/find" className="mt-4 inline-block">
                   <Button size="sm" className="mt-4">Find a Charger</Button>
                 </Link>
               </div>
@@ -147,10 +149,10 @@ export default async function DashboardPage() {
 
                     <div className="flex gap-2">
                       <Button className="flex-1" asChild>
-                        <Link href={`/charging/${res.id}`}>View Details</Link>
+                        <Link href={`/booking/${res.id}`}>View Details</Link>
                       </Button>
                       <Button variant="outline" className="flex-1" asChild>
-                        <Link href={`/charging/${res.id}`}>Start Session</Link>
+                        <Link href={`/session/${res.id}`}>Start Session</Link>
                       </Button>
                     </div>
                   </div>
@@ -181,7 +183,7 @@ export default async function DashboardPage() {
                   {pastSessions.slice(0, 5).map((b) => (
                     <Link
                       key={b.id}
-                      href={`/charging/${b.id}`}
+                      href={`/session/${b.id}`}
                       className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors cursor-pointer group"
                     >
                       <div className="flex items-center gap-4">

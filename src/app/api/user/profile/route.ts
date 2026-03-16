@@ -60,6 +60,7 @@ export async function PATCH(req: NextRequest) {
   });
   const cookie = setAuthCookie(newToken);
   const jar = await cookies();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   jar.set(cookie.name, cookie.value, cookie.options as any);
 
   return NextResponse.json({ profile: updated });

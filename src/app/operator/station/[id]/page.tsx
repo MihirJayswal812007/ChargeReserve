@@ -51,6 +51,7 @@ export default async function StationManagementPage({ params }: { params: { id: 
     await prisma.charger.create({
       data: {
         stationId: params.id,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         type: type as any,
         powerKw: powerKw,
         pricePerKwh: pricePerKwh,

@@ -40,6 +40,7 @@ export default async function StationPage({
       station={{
         ...station,
         availableChargers: availableCount,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         chargers: station.chargers as any,
       }}
     />

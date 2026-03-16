@@ -27,7 +27,7 @@ export default function SessionError({
           Session Error
         </h2>
         <p className="text-zinc-400 max-w-md mx-auto">
-          We couldn't load your charging session. The session might have ended or there might be a network issue.
+          We couldn&apos;t load your charging session. The session might have ended or there might be a network issue.
         </p>
       </div>
 

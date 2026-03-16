@@ -21,7 +21,7 @@ export default function NotFound() {
           Station Not Found
         </h1>
         <p className="text-lg text-zinc-400 max-w-md mx-auto">
-          We couldn't find the page or charging station you're looking for. It might have been moved or removed.
+          We couldn&apos;t find the page or charging station you&apos;re looking for. It might have been moved or removed.
         </p>
       </div>
 
