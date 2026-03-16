@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Zap, User, LogOut, LayoutDashboard, ChevronDown, Map, Cog, ShieldCheck, Menu, X } from "@/lib/icons";
+import { Zap, User, LogOut, LayoutDashboard, ChevronDown, Map, Cog, ShieldCheck, Menu, X, Info } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -64,6 +64,9 @@ export function Navbar() {
           </Link>
           <Link href="/#stations" className="hover:text-foreground transition-colors">Stations</Link>
           <Link href="/#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
+          <Link href="/about" className={`transition-colors flex items-center gap-1 ${pathname === '/about' ? 'text-foreground' : 'hover:text-foreground'}`}>
+            <Info className="w-3.5 h-3.5" />About
+          </Link>
         </nav>
 
         {/* Auth area */}
@@ -171,6 +174,9 @@ export function Navbar() {
             </Link>
             <Link href="/#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-muted-foreground hover:text-foreground">
               How It Works
+            </Link>
+            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 ${pathname === '/about' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              <Info className="w-4 h-4" /> About
             </Link>
             
             <div className="h-px bg-border my-2"></div>

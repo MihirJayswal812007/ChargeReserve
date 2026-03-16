@@ -26,4 +26,5 @@ export {
   Star,
   Sun,
   Moon,
+  Info,
 } from "lucide-react";

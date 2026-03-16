@@ -144,6 +144,9 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Green glow only in dark mode */
+  .dark body {
     background-image: radial-gradient(circle at 50% 0%, rgba(0, 255, 135, 0.05), transparent 70%);
   }
 }
