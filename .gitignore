@@ -57,3 +57,6 @@ build_log.txt
 build_output.txt
 eslint_report.txt
 test-api.js
+
+# Obsidian state
+.obsidian/
