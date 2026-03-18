@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "acaa08bad311913a",
+        "id": "2852c2a0fcf91a7c",
         "type": "tabs",
         "children": [
           {
-            "id": "d1211a9552101994",
+            "id": "3063f32ab68fd4c5",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -176,8 +176,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "d1211a9552101994",
+  "active": "3063f32ab68fd4c5",
   "lastOpenFiles": [
+    "node_modules/eslint-plugin-jsx-a11y/README.md",
     "node_modules/@types/use-sync-external-store/package.json",
     "node_modules/@types/d3-timer/package.json",
     "node_modules/@types/d3-time/package.json",
@@ -188,7 +189,6 @@
     "node_modules/@types/d3-ease/package.json",
     "node_modules/@types/d3-color/package.json",
     "node_modules/@types/d3-array/package.json",
-    "src/components/ui/table.tsx",
     "node_modules/@prisma/client-runtime-utils/README.md",
     "node_modules/@prisma/driver-adapter-utils/README.md",
     "node_modules/@types/pg/README.md",
