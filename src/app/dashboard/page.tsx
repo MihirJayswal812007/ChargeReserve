@@ -6,33 +6,37 @@ import { Button } from "@/components/ui/button";
 
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import VehicleManager from "@/components/dashboard/vehicle-manager";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const allBookings = await prisma.booking.findMany({
-    where: { userId: user.userId },
-    include: {
-      charger: {
-        include: {
-          station: { select: { name: true, address: true } },
+  const [allBookings, vehicles] = await Promise.all([
+    prisma.booking.findMany({
+      where: { userId: user.userId },
+      include: {
+        charger: {
+          include: {
+            station: { select: { name: true, address: true } },
+          },
+        },
+        session: {
+          select: { id: true, energyUsed: true, cost: true, duration: true, status: true, startTime: true },
         },
       },
-      session: {
-        select: { id: true, energyUsed: true, cost: true, duration: true, status: true, startTime: true },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    prisma.vehicle.findMany({ where: { userId: user.userId }, orderBy: { createdAt: "desc" } }),
+  ]);
 
   const activeReservations = allBookings.filter(
-    (b) => b.status === "CONFIRMED" || b.status === "PENDING"
+    (b: any) => b.status === "CONFIRMED" || b.status === "PENDING"
   );
 
   const pastSessions = allBookings.filter(
-    (b) => b.status === "COMPLETED" || b.session?.status === "COMPLETED"
+    (b: any) => b.status === "COMPLETED" || b.session?.status === "COMPLETED"
   );
 
   return (
@@ -82,7 +86,7 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {activeReservations.map((res) => (
+                {activeReservations.map((res: any) => (
                   <div
                     key={res.id}
                     className="bg-card border rounded-2xl p-5 shadow-sm transition-all hover:shadow-md"
@@ -180,7 +184,7 @@ export default async function DashboardPage() {
             ) : (
               <div className="bg-card border rounded-2xl overflow-hidden shadow-sm">
                 <div className="divide-y divide-border">
-                  {pastSessions.slice(0, 5).map((b) => (
+                  {pastSessions.slice(0, 5).map((b: any) => (
                     <Link
                       key={b.id}
                       href={`/session/${b.id}`}
@@ -233,18 +237,9 @@ export default async function DashboardPage() {
             )}
           </section>
         </div>
-
         {/* Sidebar */}
         <div className="space-y-6">
-          <div className="bg-card border rounded-2xl p-5 shadow-sm">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Car className="w-4 h-4 text-primary" /> My Vehicles
-            </h3>
-            <p className="text-sm text-muted-foreground mb-3">Manage your EV vehicles here.</p>
-            <Button variant="outline" className="w-full text-sm h-8" size="sm">
-              Add Vehicle
-            </Button>
-          </div>
+          <VehicleManager initialVehicles={vehicles as any} />
 
           <div className="bg-card border rounded-2xl p-5 shadow-sm">
             <h3 className="font-semibold mb-4 flex items-center gap-2">

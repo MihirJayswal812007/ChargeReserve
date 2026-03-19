@@ -15,19 +15,17 @@ interface AuthUser {
   role: string;
 }
 
-export function Navbar() {
+export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(initialUser || null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Sync prop changes (e.g. after router navigation where layout re-runs)
   useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => d && setUser(d.user))
-      .catch(() => null);
-  }, []);
+    setUser(initialUser ?? null);
+  }, [initialUser]);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });

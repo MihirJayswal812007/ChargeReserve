@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { getUserFromToken } from "@/lib/auth";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,9 +14,19 @@ export const metadata: Metadata = {
   description: "Find and book your EV charging station effortlessly.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const payload = await getUserFromToken();
+  const initialUser = payload
+    ? {
+        id: payload.userId,
+        name: payload.name,
+        email: payload.email,
+        role: payload.role,
+      }
+    : null;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen antialiased selection:bg-primary/30 selection:text-primary flex flex-col`}>
@@ -25,7 +36,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
+          <Navbar initialUser={initialUser} />
           <div className="flex-1 flex flex-col">
             {children}
           </div>

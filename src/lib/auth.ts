@@ -64,6 +64,15 @@ export async function getCurrentUser(): Promise<JwtPayload | null> {
   return payload;
 }
 
+// ── Lightweight token-only read (no DB call) ───────────────
+// Use this in layout.tsx for navbar initialUser only.
+// Avoids a DB round-trip that can silently fail and hide auth state.
+export async function getUserFromToken(): Promise<JwtPayload | null> {
+  const token = await getTokenFromCookie();
+  if (!token) return null;
+  return verifyToken(token); // JWT exp/sig check only — fast and reliable
+}
+
 export function setAuthCookie(token: string): {
   name: string;
   value: string;

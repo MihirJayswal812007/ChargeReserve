@@ -81,6 +81,15 @@ export default function FindPage() {
   
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [radius, setRadius] = useState<number>(50); // Default 50km
+  const [filterMyVehicles, setFilterMyVehicles] = useState(false);
+  const [userVehicles, setUserVehicles] = useState<{ id: string; connectorType: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/user/vehicles")
+      .then((res) => res.json())
+      .then((data) => setUserVehicles(Array.isArray(data) ? data : data.vehicles || []))
+      .catch(() => {});
+  }, []);
 
   const fetchStations = useCallback(async () => {
     setLoading(true);
@@ -167,6 +176,12 @@ export default function FindPage() {
 
   const maxPower = (s: Station) =>
     s.chargers?.length > 0 ? Math.max(...s.chargers.map((c) => c.powerKw)) : null;
+
+  const displayedStations = stations.filter((s) => {
+    if (!filterMyVehicles || userVehicles.length === 0) return true;
+    const myConnectors = userVehicles.map((v) => v.connectorType);
+    return (s.chargers || []).some((c) => myConnectors.includes(c.type));
+  });
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)]">
@@ -276,6 +291,23 @@ export default function FindPage() {
                   ))}
                 </div>
               </div>
+              {/* My Vehicles Toggle */}
+              <div className="w-full flex items-center gap-2 mt-2 pt-3 border-t border-border/50">
+                <input
+                  type="checkbox"
+                  id="my-vehicles"
+                  checked={filterMyVehicles}
+                  onChange={(e) => setFilterMyVehicles(e.target.checked)}
+                  disabled={userVehicles.length === 0}
+                  className="rounded border-input text-primary focus:ring-primary w-4 h-4 cursor-pointer"
+                />
+                <label
+                  htmlFor="my-vehicles"
+                  className={`text-sm font-medium ${userVehicles.length === 0 ? "text-muted-foreground/50" : "text-muted-foreground cursor-pointer"}`}
+                >
+                  Only show compatible with My Vehicles {userVehicles.length === 0 ? "(Add in Dashboard)" : `(${userVehicles.length})`}
+                </label>
+              </div>
             </div>
           </motion.div>
         )}
@@ -289,7 +321,7 @@ export default function FindPage() {
             <div className="flex items-center justify-center py-16 text-muted-foreground gap-2">
               <Loader2 className="w-5 h-5 animate-spin" /> Loading stations…
             </div>
-          ) : stations.length === 0 ? (
+          ) : displayedStations.length === 0 ? (
             <div className="text-center py-16 px-6">
               <MapPin className="w-10 h-10 mx-auto mb-3 opacity-30" />
               <p className="font-medium">No stations found</p>
@@ -298,9 +330,9 @@ export default function FindPage() {
           ) : (
             <div className="divide-y divide-border">
               <div className="px-4 py-2.5 text-xs text-muted-foreground font-medium">
-                {stations.length} station{stations.length !== 1 ? "s" : ""} found
+                {displayedStations.length} station{displayedStations.length !== 1 ? "s" : ""} found
               </div>
-              {stations.map((s) => (
+              {displayedStations.map((s) => (
                 <Link
                   key={s.id}
                   href={`/station/${s.id}`}
@@ -349,7 +381,7 @@ export default function FindPage() {
         {/* Map area (desktop) */}
         <div className="flex-1 relative hidden md:block overflow-hidden bg-secondary/10">
           <StationMap
-            stations={stations}
+            stations={displayedStations}
             selectedStation={selected}
             onSelectStation={setSelected}
             userLocation={userLocation}
