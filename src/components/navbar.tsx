@@ -54,7 +54,7 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <Link href="/">
+          <Link href="/explore">
             <Logo textClassName="hidden sm:inline-block" />
           </Link>
         </div>
@@ -64,9 +64,9 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
           <Link href="/find" className={`transition-colors flex items-center gap-1 ${pathname === '/find' ? 'text-foreground' : 'hover:text-foreground'}`}>
             <Map className="w-3.5 h-3.5" />Map
           </Link>
-          <Link href="/#stations" className="hover:text-foreground transition-colors">Stations</Link>
-          <Link href="/#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
-          <Link href="/about" className={`transition-colors flex items-center gap-1 ${pathname === '/about' ? 'text-foreground' : 'hover:text-foreground'}`}>
+          <Link href="/explore#stations" className="hover:text-foreground transition-colors">Stations</Link>
+          <Link href="/explore#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
+          <Link href="/" className={`transition-colors flex items-center gap-1 ${pathname === '/' ? 'text-foreground' : 'hover:text-foreground'}`}>
             <Info className="w-3.5 h-3.5" />About
           </Link>
 
@@ -177,13 +177,13 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
             <Link href="/find" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 ${pathname === '/find' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
               <Map className="w-4 h-4" /> Map
             </Link>
-            <Link href="/#stations" onClick={() => setMobileMenuOpen(false)} className="text-muted-foreground hover:text-foreground">
+            <Link href="/explore#stations" onClick={() => setMobileMenuOpen(false)} className="text-muted-foreground hover:text-foreground">
               Stations
             </Link>
-            <Link href="/#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-muted-foreground hover:text-foreground">
+            <Link href="/explore#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-muted-foreground hover:text-foreground">
               How It Works
             </Link>
-            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 ${pathname === '/about' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 ${pathname === '/' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
               <Info className="w-4 h-4" /> About
             </Link>
 

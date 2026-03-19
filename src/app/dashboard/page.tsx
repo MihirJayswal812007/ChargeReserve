@@ -7,10 +7,16 @@ import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import VehicleManager from "@/components/dashboard/vehicle-manager";
+import PremiumCard from "@/components/dashboard/premium-card";
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.userId },
+    select: { isPremium: true, premiumExpiresAt: true }
+  });
 
   const [allBookings, vehicles] = await Promise.all([
     prisma.booking.findMany({
@@ -260,6 +266,11 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
+          
+          <PremiumCard 
+            isPremium={dbUser?.isPremium || false} 
+            expiresAt={dbUser?.premiumExpiresAt} 
+          />
         </div>
       </div>
     </div>

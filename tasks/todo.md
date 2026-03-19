@@ -51,7 +51,7 @@
 
 ## Current Tasks
 
----
+---     
 
 ## Task: UI Updates (Navbar, About, Contact)
 **Goal:** Remove services from navbar, make about and contact pages light mode friendly

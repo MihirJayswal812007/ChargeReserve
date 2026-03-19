@@ -12,7 +12,7 @@ const FOOTER_LINKS = {
     { label: "Reviews", href: "#" },
   ],
   Company: [
-    { label: "About Us", href: "/about" },
+    { label: "About Us", href: "/" },
     { label: "Careers", href: "#" },
     { label: "Contact", href: "/contact" },
     { label: "Newsroom", href: "#" },
@@ -53,7 +53,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 mb-24">
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-8">
-            <Logo />
+            <Link href="/explore">
+              <Logo />
+            </Link>
             <p className="body-font text-muted-foreground max-w-sm leading-relaxed text-sm">
               The world's most advanced EV charging reservation platform. 
               Pioneering infrastructure for the next generation of mobility.

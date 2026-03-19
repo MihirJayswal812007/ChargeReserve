@@ -8,19 +8,18 @@ import { cn } from "@/lib/utils"
 
 const MOVEMENT_DAMPING = 1400
 
-const GLOBE_CONFIG: Omit<COBEOptions, "onRender"> = {
+import { useTheme } from "next-themes"
+
+const GLOBE_CONFIG: Omit<COBEOptions, "onRender" | "baseColor" | "glowColor" | "dark"> = {
   width: 800,
   height: 800,
   devicePixelRatio: 2,
   phi: 0,
   theta: 0.3,
-  dark: 1,
   diffuse: 1.2,
   mapSamples: 16000,
   mapBrightness: 6,
-  baseColor: [0.3, 0.3, 0.3],
   markerColor: [251 / 255, 100 / 255, 21 / 255],
-  glowColor: [1, 1, 1],
   markers: [
     { location: [14.5995, 120.9842], size: 0.03 },
     { location: [19.076, 72.8777], size: 0.1 },
@@ -47,6 +46,8 @@ export function Globe({
   const widthRef = useRef(0)
   const pointerInteracting = useRef<number | null>(null)
   const pointerInteractionMovement = useRef(0)
+  const { theme, resolvedTheme } = useTheme()
+  const isDark = (theme === "system" ? resolvedTheme : theme) === "dark"
 
   const r = useMotionValue(0)
   const rs = useSpring(r, {
@@ -80,7 +81,13 @@ export function Globe({
     window.addEventListener("resize", onResize)
     onResize()
 
-    const mergedConfig = { ...GLOBE_CONFIG, ...config }
+    const mergedConfig = { 
+      ...GLOBE_CONFIG, 
+      dark: isDark ? 1 : 0,
+      baseColor: isDark ? [0.3, 0.3, 0.3] : [1, 1, 1],
+      glowColor: isDark ? [1, 1, 1] : [0.1, 0.1, 0.1],
+      ...config 
+    }
     
     // We type assert the config object as any because of onRender parameter type issues
     const globe = createGlobe(canvasRef.current!, {
@@ -100,7 +107,8 @@ export function Globe({
       globe.destroy()
       window.removeEventListener("resize", onResize)
     }
-  }, [rs, config])
+  }, [rs, config, isDark])
+
 
   return (
     <div
