@@ -166,7 +166,7 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                 <ShieldCheck className="w-4 h-4 text-primary" /> Verified
               </span>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 text-white">
+            <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 text-foreground">
               {station.name}
             </h1>
             <p className="text-lg text-muted-foreground flex items-center pr-4 font-medium">
@@ -176,24 +176,24 @@ export default function StationDetailClient({ station }: StationDetailProps) {
           </div>
 
           {/* Stats bar */}
-          <div className="flex items-center gap-6 p-5 rounded-2xl bg-secondary/30 backdrop-blur-md border border-white/5 overflow-x-auto whitespace-nowrap shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+          <div className="flex items-center gap-6 p-5 rounded-2xl bg-secondary/30 backdrop-blur-md border border-border overflow-x-auto whitespace-nowrap shadow-sm">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(0,255,135,0.1)]">
                 <Zap className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Max Power</p>
-                <p className="font-semibold">{maxPower} kW</p>
+                <p className="font-semibold text-foreground">{maxPower} kW</p>
               </div>
             </div>
-            <div className="w-px h-12 bg-white/10" />
+            <div className="w-px h-12 bg-border" />
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(0,255,135,0.1)]">
                 <CreditCard className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Pricing</p>
-                <p className="font-semibold">
+                <p className="font-semibold text-foreground">
                   ₹{charger?.pricePerKwh.toFixed(2) ?? "—"}/kWh
                 </p>
               </div>
@@ -205,7 +205,7 @@ export default function StationDetailClient({ station }: StationDetailProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Hours</p>
-                <p className="font-semibold">{station.operatingHours}</p>
+                <p className="font-semibold text-foreground">{station.operatingHours}</p>
               </div>
             </div>
           </div>
@@ -225,7 +225,7 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                   className={`transition-all duration-300 cursor-pointer overflow-hidden ${
                     selectedCharger?.id === c.id
                       ? "border-primary bg-primary/5 shadow-[0_0_20px_rgba(0,255,135,0.1)] scale-[1.01]"
-                      : "border-white/5 bg-secondary/20 hover:bg-secondary/40 hover:border-white/10"
+                      : "border-border bg-secondary/20 hover:bg-secondary/40 hover:border-primary/20"
                   } ${c.status !== "AVAILABLE" ? "opacity-50 cursor-not-allowed grayscale-[50%]" : "backdrop-blur-xl"}`}
                 >
                   <CardContent className="p-5 flex items-center justify-between relative">
@@ -234,15 +234,15 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                     )}
                     <div className="flex items-center gap-5">
                       <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${
-                          c.status === "AVAILABLE" ? "bg-primary/10 text-primary border border-primary/20" : "bg-muted text-muted-foreground border border-white/5"
+                          c.status === "AVAILABLE" ? "bg-primary/10 text-primary border border-primary/20" : "bg-muted text-muted-foreground border border-border"
                       }`}>
                         <Zap className="w-6 h-6" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-lg text-white mb-1 tracking-tight">
+                        <h4 className="font-semibold text-lg text-foreground mb-1 tracking-tight">
                           Stall #{i + 1} <span className="text-muted-foreground mx-2">•</span> {c.type}
                         </h4>
-                        <p className="text-sm text-zinc-400 font-medium font-mono">
+                        <p className="text-sm text-muted-foreground font-medium font-mono">
                           {c.powerKw} kW <span className="text-muted-foreground mx-1">—</span> ₹{c.pricePerKwh.toFixed(2)}/kWh
                         </p>
                       </div>
@@ -259,7 +259,7 @@ export default function StationDetailClient({ station }: StationDetailProps) {
             </TabsContent>
 
             <TabsContent value="amenities" className="mt-8">
-              <Card className="border-white/5 bg-secondary/30 backdrop-blur-xl">
+              <Card className="border-border bg-secondary/30 backdrop-blur-xl">
                 <CardContent className="p-8 grid grid-cols-2 gap-6">
                   {station.amenities.length > 0 ? (
                     station.amenities.map((item) => (
@@ -267,7 +267,7 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center transition-transform group-hover:scale-110">
                           <ShieldCheck className="w-5 h-5 text-primary" />
                         </div>
-                        <span className="font-medium text-zinc-300 group-hover:text-white transition-colors">{item}</span>
+                        <span className="font-medium text-foreground group-hover:text-primary transition-colors">{item}</span>
                       </div>
                     ))
                   ) : (
@@ -289,24 +289,24 @@ export default function StationDetailClient({ station }: StationDetailProps) {
           transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
         >
           <div className="absolute inset-0 bg-primary/10 blur-[60px] rounded-full pointer-events-none" />
-          <Card className="relative overflow-hidden shadow-2xl shadow-black/50 border-white/10 bg-background/80 backdrop-blur-xl">
+          <Card className="relative overflow-hidden shadow-2xl border-border bg-background/80 backdrop-blur-xl">
             <div className="absolute inset-x-0 h-px top-0 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             <CardContent className="p-8 space-y-8">
               <div className="space-y-2">
-                <h3 className="text-2xl font-bold tracking-tight text-white">Reserve a Charger</h3>
+                <h3 className="text-2xl font-bold tracking-tight text-foreground">Reserve a Charger</h3>
                 <p className="text-sm text-muted-foreground">Secure your spot instantly and avoid waiting lines.</p>
               </div>
 
               {/* Charger selector */}
               {availableChargers.length === 0 ? (
-                <div className="text-center py-10 text-muted-foreground rounded-2xl bg-secondary/20 border border-white/5">
+                <div className="text-center py-10 text-muted-foreground rounded-2xl bg-secondary/20 border border-border">
                   <Zap className="w-10 h-10 mx-auto mb-3 opacity-30" />
                   <p className="text-sm font-medium">No chargers available right now.</p>
                 </div>
               ) : (
                 <>
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold text-zinc-300">Select Charger</label>
+                    <label className="text-sm font-semibold text-foreground">Select Charger</label>
                     <div className="space-y-3">
                       {availableChargers.map((c, i) => (
                         <button
@@ -314,15 +314,15 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                           onClick={() => setSelectedCharger(c)}
                           className={`w-full flex items-center justify-between p-4 rounded-xl border text-sm transition-all duration-300 ${
                             (selectedCharger?.id ?? availableChargers[0]?.id) === c.id
-                              ? "border-primary bg-primary/10 shadow-[0_0_15px_rgba(0,255,135,0.1)] text-white"
-                              : "border-white/10 bg-secondary/30 hover:bg-secondary/50 text-zinc-300 hover:border-white/20"
+                              ? "border-primary bg-primary/10 shadow-[0_0_15px_rgba(0,255,135,0.1)] text-primary"
+                              : "border-border bg-secondary/30 hover:bg-secondary/50 text-muted-foreground hover:border-primary/30"
                           }`}
                         >
                           <span className="font-medium">
                             Stall #{station.chargers.indexOf(c) + 1} <span className="text-muted-foreground mx-2">•</span> {c.type}
                           </span>
                           <span className={`font-mono font-bold ${
-                            (selectedCharger?.id ?? availableChargers[0]?.id) === c.id ? "text-primary" : "text-zinc-200"
+                            (selectedCharger?.id ?? availableChargers[0]?.id) === c.id ? "text-primary" : "text-foreground"
                           }`}>
                             ₹{c.pricePerKwh.toFixed(2)}/kWh
                           </span>
@@ -332,7 +332,7 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold flex items-center gap-2 text-zinc-300">
+                    <label className="text-sm font-semibold flex items-center gap-2 text-foreground">
                       <Calendar className="w-4 h-4 text-primary" /> Duration
                     </label>
                     <div className="grid grid-cols-4 gap-3">
@@ -342,8 +342,8 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                           onClick={() => setDurationMins(mins)}
                           className={`py-3 rounded-xl border text-sm font-bold transition-all duration-300 ${
                             durationMins === mins
-                              ? "border-primary bg-primary text-black shadow-[0_0_15px_rgba(0,255,135,0.3)]"
-                              : "border-white/10 bg-secondary/30 text-zinc-300 hover:border-white/20 hover:bg-secondary/50"
+                              ? "border-primary bg-primary text-primary-foreground shadow-[0_0_15px_rgba(0,255,135,0.3)]"
+                              : "border-border bg-secondary/30 text-muted-foreground hover:border-primary/30 hover:bg-secondary/50"
                           }`}
                         >
                           {mins < 60 ? `${mins}m` : `${mins / 60}h`}
@@ -352,20 +352,20 @@ export default function StationDetailClient({ station }: StationDetailProps) {
                     </div>
                   </div>
 
-                  <div className="bg-secondary/40 border border-white/5 rounded-2xl p-6 space-y-4 backdrop-blur-md relative overflow-hidden">
+                  <div className="bg-secondary/40 border border-border rounded-2xl p-6 space-y-4 backdrop-blur-md relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] pointer-events-none" />
                     <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Estimated Energy</span>
-                      <span className="font-bold text-white font-mono">{estimatedKwh} kWh</span>
+                      <span className="text-muted-foreground font-medium">Estimated Energy</span>
+                      <span className="font-bold text-foreground font-mono">{estimatedKwh} kWh</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-zinc-400 font-medium">Rate limit factor</span>
-                      <span className="font-bold text-white font-mono">80% (<span className="text-xs text-muted-foreground mr-2">Average capacity charge curve</span>)</span>
+                      <span className="text-muted-foreground font-medium">Rate limit factor</span>
+                      <span className="font-bold text-foreground font-mono">80% (<span className="text-xs text-muted-foreground mr-2">Average capacity charge curve</span>)</span>
                     </div>
-                    <div className="w-full h-px bg-white/10" />
+                    <div className="w-full h-px bg-border" />
                     <div className="flex justify-between items-center">
-                      <span className="font-semibold text-zinc-300">Estimated Total</span>
-                      <span className="text-3xl font-black text-white shrink-0">
+                      <span className="font-semibold text-foreground">Estimated Total</span>
+                      <span className="text-3xl font-black text-foreground shrink-0">
                         ₹{estimatedCost}
                       </span>
                     </div>

@@ -13,6 +13,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Vehicle = {
   id: string;
@@ -106,21 +113,21 @@ export default function VehicleManager({ initialVehicles }: { initialVehicles: V
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="year">Year (Optional)</Label>
-                  <Input id="year" type="number" value={year} onChange={(e) => setYear(e.target.value)} placeholder="e.g. 2023" />
+                  <Input id="year" type="number" min={1886} max={new Date().getFullYear() + 1} value={year} onChange={(e) => setYear(e.target.value)} placeholder="e.g. 2023" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="connectorType">Connector Type</Label>
-                  <select
-                    id="connectorType"
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                    value={connectorType}
-                    onChange={(e) => setConnectorType(e.target.value)}
-                  >
-                    <option value="CCS">CCS</option>
-                    <option value="CHADEMO">CHAdeMO</option>
-                    <option value="TYPE2">Type 2</option>
-                    <option value="J1772">J1772</option>
-                  </select>
+                  <Select value={connectorType} onValueChange={setConnectorType}>
+                    <SelectTrigger id="connectorType" className="h-9 w-full">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CCS">CCS</SelectItem>
+                      <SelectItem value="CHADEMO">CHAdeMO</SelectItem>
+                      <SelectItem value="TYPE2">Type 2</SelectItem>
+                      <SelectItem value="J1772">J1772</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="space-y-2">

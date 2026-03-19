@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Zap, User, LogOut, LayoutDashboard, ChevronDown, Map, Cog, ShieldCheck, Menu, X, Info } from "@/lib/icons";
+import { Zap, User, LogOut, LayoutDashboard, ChevronDown, Map, Cog, ShieldCheck, Menu, X, Info, Briefcase, Phone, Loader2 } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface AuthUser {
@@ -21,6 +22,7 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
   const [user, setUser] = useState<AuthUser | null>(initialUser || null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Sync prop changes (e.g. after router navigation where layout re-runs)
   useEffect(() => {
@@ -28,11 +30,16 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
   }, [initialUser]);
 
   async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
-    toast.success("Signed out successfully");
-    setMobileMenuOpen(false);
-    window.location.assign("/");
+    setLoading(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      toast.success("Signed out successfully");
+      setMobileMenuOpen(false);
+      window.location.assign("/");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -47,11 +54,8 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00e5ff] to-[#7b5ea7] flex items-center justify-center shadow shadow-[#00e5ff]/20">
-              <Zap className="w-4 h-4 text-black" fill="currentColor" />
-            </div>
-            <span className="font-bold text-lg tracking-tight text-foreground hidden sm:inline-block">ChargeReserve</span>
+          <Link href="/">
+            <Logo textClassName="hidden sm:inline-block" />
           </Link>
         </div>
 
@@ -64,6 +68,10 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
           <Link href="/#how-it-works" className="hover:text-foreground transition-colors">How It Works</Link>
           <Link href="/about" className={`transition-colors flex items-center gap-1 ${pathname === '/about' ? 'text-foreground' : 'hover:text-foreground'}`}>
             <Info className="w-3.5 h-3.5" />About
+          </Link>
+
+          <Link href="/contact" className={`transition-colors flex items-center gap-1 ${pathname === '/contact' ? 'text-foreground' : 'hover:text-foreground'}`}>
+            <Phone className="w-3.5 h-3.5" />Contact
           </Link>
         </nav>
 
@@ -138,10 +146,12 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
                       </Link>
                     )}
                     <button
-                      onClick={() => { setMenuOpen(false); handleLogout(); }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-500 hover:text-red-400 hover:bg-foreground/5 transition-colors border-t border-border mt-1"
+                      onClick={() => { setMenuOpen(false); handleLogout(); }} // Changed setOpen to setMenuOpen
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors border-t border-border mt-1"
+                      disabled={loading} // Disable button while loading
                     >
-                      <LogOut className="w-4 h-4" />Sign out
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                      Sign out
                     </button>
                   </div>
                 </>
@@ -152,7 +162,7 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
               <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hidden sm:inline-flex">
                 <Link href="/login">Sign in</Link>
               </Button>
-              <Button asChild size="sm" className="bg-gradient-to-r from-[#00e5ff] to-[#7b5ea7] text-black font-semibold hover:opacity-90 border-0">
+              <Button asChild size="sm" className="bg-gradient-to-r from-[#00e5ff] to-[#7b5ea7] text-zinc-950 font-bold hover:opacity-90 border-0 shadow-lg shadow-cyan-500/20">
                 <Link href="/register">Get Started</Link>
               </Button>
             </>
@@ -175,6 +185,10 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
             </Link>
             <Link href="/about" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 ${pathname === '/about' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
               <Info className="w-4 h-4" /> About
+            </Link>
+
+            <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 ${pathname === '/contact' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>
+              <Phone className="w-4 h-4" /> Contact
             </Link>
             
             <div className="h-px bg-border my-2"></div>
@@ -210,8 +224,9 @@ export function Navbar({ initialUser }: { initialUser?: AuthUser | null }) {
                     <ShieldCheck className="w-4 h-4" /> Admin Panel
                   </Link>
                 )}
-                <button onClick={handleLogout} className="text-red-500 hover:text-red-400 flex items-center gap-2 text-left">
-                  <LogOut className="w-4 h-4" /> Sign out
+                <button onClick={handleLogout} className="text-red-500 hover:text-red-400 flex items-center gap-2 text-left" disabled={loading}>
+                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                  Sign out
                 </button>
               </div>
             ) : (

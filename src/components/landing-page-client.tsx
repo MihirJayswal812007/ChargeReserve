@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import AetherFlowHero from "@/components/ui/aether-flow-hero";
+import { Globe } from "@/components/ui/globe";
 
 interface Station {
   id: string;
@@ -207,89 +208,88 @@ export default function LandingPageClient({
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-card/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 lg:p-8 flex flex-col gap-6"
+            className="relative flex items-center justify-center min-h-[400px] lg:min-h-[600px] pointer-events-none"
           >
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
-                {query ? `Results for "${query}"` : "Available Stations"}
-              </h2>
-              <span className="text-sm text-muted-foreground">
-                {filtered.length} station{filtered.length !== 1 ? "s" : ""}
-              </span>
+            {/* Replaced the list card with the real Globe in the background of the hero right side */}
+            <div className="absolute inset-0 z-0">
+               <Globe />
             </div>
+            
+            <motion.div 
+               className="relative z-10 w-full bg-card/50 backdrop-blur-xl border border-border rounded-3xl p-6 lg:p-8 flex flex-col gap-6 pointer-events-auto shadow-xl"
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 0.5, delay: 0.6 }}
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  {query ? `Results for "${query}"` : "Available Stations"}
+                </h2>
+                <span className="text-sm text-muted-foreground">
+                  {filtered.length} station{filtered.length !== 1 ? "s" : ""}
+                </span>
+              </div>
 
-            {filtered.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Zap className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                {stations.length === 0 ? (
-                  <>
-                    <p className="font-medium">No stations available yet.</p>
-                    <p className="text-sm mt-1">
-                      Check back soon or{" "}
-                      <Link href="/register" className="text-primary underline">
-                        become an operator
+              {filtered.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Zap className="w-8 h-8 mx-auto mb-3 opacity-30" />
+                  {stations.length === 0 ? (
+                    <>
+                      <p className="font-medium">No stations available yet.</p>
+                      <p className="text-sm mt-1">
+                        Check back soon or{" "}
+                        <Link href="/register" className="text-primary underline">
+                          become an operator
+                        </Link>
+                        .
+                      </p>
+                    </>
+                  ) : (
+                    <p>No stations match your search.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4 overflow-y-auto max-h-[400px] pr-1 scrollbar-hide">
+                  {filtered.slice(0, 5).map((station, i) => (
+                    <motion.div
+                      key={station.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.7 + i * 0.08 }}
+                    >
+                      <Link href={`/station/${station.id}`} className="block">
+                        <div className="group bg-background/40 hover:bg-background border border-border hover:border-primary/50 rounded-2xl p-4 transition-all cursor-pointer">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <h3 className="font-semibold group-hover:text-primary transition-colors">
+                                {station.name}
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {station.city}
+                              </p>
+                            </div>
+                            <Badge
+                              variant={
+                                station.available > 0 ? "default" : "secondary"
+                              }
+                              className="text-[10px] px-2 py-0"
+                            >
+                              {station.available} / {station.total}
+                            </Badge>
+                          </div>
+                        </div>
                       </Link>
-                      .
-                    </p>
-                  </>
-                ) : (
-                  <p>No stations match your search.</p>
-                )}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-4 overflow-y-auto max-h-[500px] pr-1">
-                {filtered.map((station, i) => (
-                  <motion.div
-                    key={station.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 + i * 0.08 }}
-                  >
-                    <Link href={`/station/${station.id}`} className="block">
-                      <div className="group bg-background border border-border hover:border-primary/50 rounded-2xl p-5 transition-all cursor-pointer hover:shadow-[0_0_20px_rgba(0,255,135,0.1)]">
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="font-semibold text-lg group-hover:text-primary transition-colors">
-                              {station.name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {station.address}, {station.city}
-                            </p>
-                          </div>
-                          <Badge
-                            variant={
-                              station.available > 0 ? "default" : "secondary"
-                            }
-                            className={
-                              station.available > 0
-                                ? "bg-primary/20 text-primary border-primary/20 hover:bg-primary/30"
-                                : ""
-                            }
-                          >
-                            {station.available} / {station.total} Available
-                          </Badge>
-                        </div>
-
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1.5">
-                            <Zap className="w-4 h-4 text-primary" />
-                            <span>{station.speed} Max</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="w-4 h-4" />
-                            <span>{station.operatingHours}</span>
-                          </div>
-                          <div className="ml-auto font-medium text-foreground">
-                            {station.price}
-                          </div>
-                        </div>
-                      </div>
+                    </motion.div>
+                  ))}
+                  {filtered.length > 5 && (
+                    <Link href="/find" className="text-xs text-center text-primary hover:underline py-2">
+                      View all {filtered.length} stations
                     </Link>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </motion.div>
           </motion.div>
         </main>
       </section>
@@ -345,7 +345,7 @@ export default function LandingPageClient({
                 transition={{ duration: 0.4, delay: i * 0.07 }}
               >
                 <Link href={`/station/${station.id}`} className="block h-full">
-                  <div className="group relative bg-card/60 backdrop-blur-md border border-white/10 hover:border-primary/40 rounded-3xl p-6 h-full flex flex-col gap-4 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,135,0.08)] hover:-translate-y-1">
+                  <div className="group relative bg-card/60 backdrop-blur-md border border-border hover:border-primary/40 rounded-3xl p-6 h-full flex flex-col gap-4 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,135,0.08)] hover:-translate-y-1">
                     {/* Availability indicator */}
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground uppercase tracking-widest font-medium">
@@ -376,7 +376,7 @@ export default function LandingPageClient({
                       </p>
                     </div>
 
-                    <div className="border-t border-white/8 pt-4 flex items-center gap-4 text-sm">
+                    <div className="border-t border-border pt-4 flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <Zap className="w-4 h-4 text-primary" />
                         <span>{station.speed}</span>
@@ -452,7 +452,7 @@ export default function LandingPageClient({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group relative bg-card/60 backdrop-blur-md border border-white/10 hover:border-primary/30 rounded-3xl p-7 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-1"
+                className="group relative bg-card/60 backdrop-blur-md border border-border hover:border-primary/30 rounded-3xl p-7 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-1"
               >
                 <div
                   className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${feat.color} flex items-center justify-center shadow-lg ${feat.glow}`}
@@ -516,12 +516,12 @@ export default function LandingPageClient({
                   <div className="w-[104px] h-[104px] rounded-full bg-card/70 backdrop-blur-md border border-primary/30 flex items-center justify-center shadow-[0_0_40px_rgba(0,255,135,0.12)]">
                     <step.icon className="w-10 h-10 text-primary" />
                   </div>
-                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-black text-xs font-bold flex items-center justify-center shadow-lg shadow-primary/30">
+                  <span className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center shadow-lg shadow-primary/30">
                     {i + 1}
                   </span>
                 </div>
 
-                <div className="bg-card/50 backdrop-blur-md border border-white/10 rounded-3xl p-6 w-full transition-all hover:border-primary/30 hover:shadow-[0_0_24px_rgba(0,255,135,0.07)]">
+                <div className="bg-card/50 backdrop-blur-md border border-border rounded-3xl p-6 w-full transition-all hover:border-primary/30 hover:shadow-[0_0_24px_rgba(0,255,135,0.07)]">
                   <h3 className="text-xl font-bold mb-3">{step.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {step.description}

@@ -32,7 +32,8 @@
 | Admin Dashboard | ✅ Done | `/admin/dashboard` with admin-dashboard-client.tsx |
 | Admin Station Approval | ✅ Done | `/api/admin/stations/[id]` (approve/reject) |
 | Settings Page | ✅ Done | `/settings` user profile update |
-| About Page | ✅ Done | `/about` static page |
+| About Page | ✅ Done | `/about` page (merged with Services) |
+| Contact Page | 🟡 In Progress | Light mode updates pending |
 | Demo Page | ✅ Done | `/demo` page |
 | StationMap Component | ✅ Done | MapLibre GL integration in `StationMap.tsx` |
 | Navbar | ✅ Done | Role-aware navigation, dark/light toggle |
@@ -50,7 +51,17 @@
 
 ## Current Tasks
 
-<!-- Add new tasks below this line -->
+---
+
+## Task: UI Updates (Navbar, About, Contact)
+**Goal:** Remove services from navbar, make about and contact pages light mode friendly
+**Date:** 2026-03-19
+**Status:** 🟡 In Progress
+
+### Plan
+- [ ] Remove `/services` from `Navbar`
+- [ ] Make `about` page light-mode friendly
+- [ ] Make `contact` page light-mode friendly
 
 ---
 

@@ -66,7 +66,7 @@ export const MaskRevealHero = ({
             : "0 0",
           WebkitMaskSize: isHovered ? `100%, ${maskSize}px` : "auto",
           WebkitMaskRepeat: isHovered ? "repeat, no-repeat" : "repeat",
-        }}
+        } as any}
         transition={{ type: "tween", ease: "backOut", duration: 0.1 }}
       >
         {baseContent}
@@ -80,7 +80,7 @@ export const MaskRevealHero = ({
             mousePosition.y - maskSize / 2
           }px`,
           WebkitMaskSize: `${maskSize}px`,
-        }}
+        } as any}
         transition={{ type: "tween", ease: "backOut", duration: 0.1 }}
       >
         <div className="absolute inset-0 w-full h-full">

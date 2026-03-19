@@ -33,6 +33,8 @@ ChargeReserve/
 │   │   ├── (auth)/             # Auth routes (login, register)
 │   │   ├── dashboard/          # User dashboard
 │   │   ├── operator/           # Operator panel
+│   │   ├── about/              # About & Services page (merged)
+│   │   ├── contact/            # Contact page
 │   │   └── api/                # API routes
 │   ├── components/
 │   │   ├── ui/                 # shadcn/ui + custom UI components

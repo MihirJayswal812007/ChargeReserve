@@ -105,7 +105,7 @@ html {
 
     --radius: 0.75rem;
   }
-  
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -135,6 +135,12 @@ html {
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 152 100% 50%;
+  }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
   }
 }
 

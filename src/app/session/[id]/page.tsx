@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 type Stage = "loading" | "starting" | "charging" | "stopping" | "finished" | "error";
+type PayState = "idle" | "paying" | "paid" | "failed";
 
 interface SessionData {
   id: string;
@@ -50,6 +51,8 @@ export default function ChargingSession() {
 
   const [stage, setStage] = useState<Stage>("loading");
   const [booking, setBooking] = useState<BookingData | null>(null);
+  const [payState, setPayState] = useState<PayState>("idle");
+  const [txnId, setTxnId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   // Live metrics
@@ -384,33 +387,99 @@ export default function ChargingSession() {
               animate={{ opacity: 1, scale: 1 }}
               className="space-y-4"
             >
-              <div className="bg-primary/10 border border-primary/20 rounded-2xl p-6 text-center">
+              {/* Session summary card */}
+              <div className="bg-card border border-border rounded-2xl p-6 text-center">
                 <CheckCircle2 className="w-10 h-10 text-primary mx-auto mb-3" />
-                <h3 className="text-lg font-bold text-primary mb-1">Charging Complete!</h3>
+                <h3 className="text-lg font-bold text-foreground mb-1">Charging Complete!</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   Please safely unplug the connector.
                 </p>
-                <div className="flex justify-between text-sm border-t border-primary/10 pt-4">
+                <div className="flex justify-between text-sm border-t border-border pt-4">
                   <span className="text-muted-foreground">Total Cost</span>
-                  <span className="font-bold text-xl">₹{cost.toFixed(2)}</span>
+                  <span className="font-bold text-xl text-foreground">₹{cost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm pt-2">
                   <span className="text-muted-foreground">Energy</span>
-                  <span className="font-medium">{energyUsed.toFixed(2)} kWh</span>
+                  <span className="font-medium text-foreground">{energyUsed.toFixed(2)} kWh</span>
                 </div>
                 <div className="flex justify-between text-sm pt-2">
                   <span className="text-muted-foreground">Duration</span>
-                  <span className="font-medium">{fmt(elapsed)}</span>
+                  <span className="font-medium text-foreground">{fmt(elapsed)}</span>
                 </div>
               </div>
 
-              <Button
-                size="lg"
-                className="w-full py-6 font-semibold"
-                onClick={() => router.push("/")}
-              >
-                Return Home
-              </Button>
+              {/* Payment block */}
+              {payState === "idle" && (
+                <div className="bg-card border border-border rounded-2xl p-5 space-y-3">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Complete your payment to finalise this session.
+                  </p>
+                  <Button
+                    size="lg"
+                    className="w-full py-6 font-semibold"
+                    onClick={async () => {
+                      setPayState("paying");
+                      try {
+                        const res = await fetch("/api/payments", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ bookingId }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error);
+                        setTxnId(data.transactionId);
+                        setPayState("paid");
+                        toast.success("Payment confirmed!");
+                      } catch (err: unknown) {
+                        const msg = err instanceof Error ? err.message : "Payment failed";
+                        toast.error(msg);
+                        setPayState("failed");
+                      }
+                    }}
+                  >
+                    <Zap className="w-4 h-4 mr-2" />
+                    Pay ₹{cost.toFixed(2)} Now
+                  </Button>
+                </div>
+              )}
+
+              {payState === "paying" && (
+                <div className="bg-card border border-border rounded-2xl p-5 flex flex-col items-center gap-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Processing payment…</p>
+                </div>
+              )}
+
+              {payState === "paid" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-5 text-center space-y-2"
+                >
+                  <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto" />
+                  <p className="font-semibold text-emerald-600 dark:text-emerald-400">Payment Confirmed!</p>
+                  <p className="text-xs text-muted-foreground">Amount: ₹{cost.toFixed(2)}</p>
+                  {txnId && (
+                    <p className="text-xs font-mono text-muted-foreground break-all">{txnId}</p>
+                  )}
+                </motion.div>
+              )}
+
+              {payState === "failed" && (
+                <div className="bg-destructive/10 border border-destructive/30 rounded-2xl p-5 text-center space-y-2">
+                  <AlertCircle className="w-8 h-8 text-destructive mx-auto" />
+                  <p className="text-sm text-destructive font-medium">Payment failed. Please try again.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPayState("idle")}
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10"
+                  >
+                    Retry
+                  </Button>
+                </div>
+              )}
+
               <Button
                 variant="outline"
                 size="lg"
@@ -418,6 +487,14 @@ export default function ChargingSession() {
                 onClick={() => router.push("/reservations")}
               >
                 My Reservations
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-muted-foreground"
+                onClick={() => router.push("/")}
+              >
+                Return Home
               </Button>
             </motion.div>
           )}
