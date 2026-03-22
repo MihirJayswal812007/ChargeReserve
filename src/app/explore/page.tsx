@@ -4,23 +4,34 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export default async function LandingPage() {
-  // Fetch latest 6 active stations with availability summary
-  const stations = await prisma.station.findMany({
-    where: { status: "ACTIVE" },
-    include: {
-      chargers: {
-        select: { status: true, powerKw: true, pricePerKwh: true },
+  let stations: any[] = [];
+  let errorText = "";
+  try {
+    stations = await prisma.station.findMany({
+      where: { status: "ACTIVE" },
+      include: {
+        chargers: {
+          select: { status: true, powerKw: true, pricePerKwh: true },
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-  });
+      orderBy: { createdAt: "desc" },
+      take: 6,
+    });
+  } catch (err: any) {
+    errorText = err.message || String(err);
+    console.error("Prisma error in explore page:", err);
+  }
 
-  const stationsForUI = stations.map((s) => {
-    const available = s.chargers.filter((c) => c.status === "AVAILABLE").length;
-    const maxPower = Math.max(...s.chargers.map((c) => c.powerKw), 0);
+  if (errorText) {
+    return <div className="p-8 text-red-500 whitespace-pre-wrap font-mono">{errorText}</div>;
+  }
+
+
+  const stationsForUI = stations.map((s: any) => {
+    const available = s.chargers.filter((c: any) => c.status === "AVAILABLE").length;
+    const maxPower = Math.max(...s.chargers.map((c: any) => c.powerKw), 0);
     const minPrice = s.chargers.length
-      ? Math.min(...s.chargers.map((c) => c.pricePerKwh))
+      ? Math.min(...s.chargers.map((c: any) => c.pricePerKwh))
       : null;
     return {
       id: s.id,

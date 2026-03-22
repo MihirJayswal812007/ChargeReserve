@@ -1,130 +1,50 @@
-# ChargeReserve — Project CLAUDE.md
+# Workflow Orchestration
 
-> **Session Start Ritual:**
-> 1. Read `tasks/lessons.md` — internalize all rules before touching code
-> 2. Read `tasks/todo.md` — understand current state and pending work
-> 3. Follow global workflow in `~/CLAUDE.md` throughout the session
+## 1. Plan Mode Default
+- Enter plan mode for ANY non-trivial task (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan immediately – don't keep pushing
+- Use plan mode for verification steps, not just building
+- Write detailed specs upfront to reduce ambiguity
 
----
+## 2. Subagent Strategy
+- Use subagents liberally to keep main context window clean
+- Offload research, exploration, and parallel analysis to subagents
+- For complex problems, throw more compute at it via subagents
+- One task per subagent for focused execution
 
-## Project Overview
+## 3. Self-Improvement Loop
+- After ANY correction from the user: update `tasks/lessons.md` with the pattern
+- Write rules for yourself that prevent the same mistake
+- Ruthlessly iterate on these lessons until mistake rate drops
+- Review lessons at session start for relevant project context
 
-**ChargeReserve** is an EV charging slot reservation platform built with:
+## 4. Verification Before Done
+- Never mark a task complete without proving it works
+- Diff behavior between main and your changes when relevant
+- Ask yourself: "Would a staff engineer approve this?"
+- Run tests, check logs, demonstrate correctness
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14+ (App Router) |
-| Language | TypeScript |
-| Styling | Tailwind CSS |
-| UI Components | shadcn/ui |
-| Database | PostgreSQL via Neon DB |
-| ORM | Prisma |
-| Auth | NextAuth.js |
-| Deployment | Vercel (planned) |
+## 5. Demand Elegance (Balanced)
+- For non-trivial changes: pause and ask "is there a more elegant way?"
+- If a fix feels hacky: "Knowing everything I know now, implement the elegant solution"
+- Skip this for simple, obvious fixes – don't over-engineer
+- Challenge your own work before presenting it
 
----
+## 6. Autonomous Bug Fixing
+- When given a bug report: just fix it. Don't ask for hand-holding
+- Point at logs, errors, failing tests – then resolve them
+- Zero context switching required from the user
+- Go fix failing CI tests without being told how
 
-## Project Structure
+# Task Management
+1. **Plan First**: Write plan to `tasks/todo.md` with checkable items
+2. **Verify Plan**: Check in before starting implementation
+3. **Track Progress**: Mark items complete as you go
+4. **Explain Changes**: High-level summary at each step
+5. **Document Results**: Add review section to `tasks/todo.md`
+6. **Capture Lessons**: Update `tasks/lessons.md` after corrections
 
-```
-ChargeReserve/
-├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── (auth)/             # Auth routes (login, register)
-│   │   ├── dashboard/          # User dashboard
-│   │   ├── operator/           # Operator panel
-│   │   ├── about/              # About & Services page (merged)
-│   │   ├── contact/            # Contact page
-│   │   └── api/                # API routes
-│   ├── components/
-│   │   ├── ui/                 # shadcn/ui + custom UI components
-│   │   └── ...                 # Feature components
-│   └── lib/
-│       ├── auth.ts             # NextAuth config
-│       ├── prisma.ts           # Prisma client singleton
-│       └── ...
-├── prisma/
-│   ├── schema.prisma           # Database schema
-│   └── seed-csv.ts             # Seed script
-├── tasks/
-│   ├── todo.md                 ← ACTIVE TASK PLAN (update every session)
-│   └── lessons.md              ← LESSONS LOG (review every session)
-└── CLAUDE.md                   ← This file
-```
-
----
-
-## Key Roles
-
-- **EV Driver (User)**: Browses stations, books slots, manages reservations
-- **Operator**: Manages charging stations, views bookings, handles availability
-- **Admin**: Platform-level administration
-
----
-
-## Coding Standards for This Project
-
-### TypeScript
-- Strict mode enabled — no `any` types without justification
-- Use Zod for all runtime validation (API input, form data)
-- Prefer explicit return types on server actions and API handlers
-
-### Database / Prisma
-- Always use the singleton Prisma client from `src/lib/prisma.ts`
-- Run `npx prisma generate` after schema changes
-- Never use raw SQL unless absolutely necessary
-
-### Next.js App Router
-- Prefer **Server Components** by default
-- Use `"use client"` only when interactivity is required
-- Server Actions for form submissions and mutations
-- API routes only for external integrations or webhooks
-
-### Auth
-- All protected routes must check session via `auth()` from `src/lib/auth.ts`
-- Never expose sensitive data to client components without proper guards
-
-### Styling
-- Use Tailwind utility classes
-- Follow the dark/light theme system set up via `theme-provider.tsx`
-- Never write inline styles unless generating dynamic values
-
----
-
-## Common Commands
-
-```bash
-# Development
-npm run dev
-
-# Database
-npx prisma studio          # GUI for database
-npx prisma migrate dev      # Create + apply migration
-npx prisma generate         # Regenerate Prisma client
-npx prisma db seed          # Run seed script
-
-# Type checking
-npx tsc --noEmit
-
-# Linting
-npm run lint
-```
-
----
-
-## Anti-Patterns — Never Do These
-
-- ❌ Do not use `useEffect` for data fetching — use Server Components or React Query
-- ❌ Do not commit `.env` or `.env.local` files
-- ❌ Do not bypass TypeScript errors with `@ts-ignore` without a comment explaining why
-- ❌ Do not write new DB queries outside of server-side code (Server Components, Server Actions, API routes)
-- ❌ Do not mark a task done before verifying it works end-to-end
-
----
-
-## Task Files
-
-| File | Purpose |
-|------|---------|
-| `tasks/todo.md` | Current sprint / feature plan with checkable steps |
-| `tasks/lessons.md` | Lessons from mistakes — **read before every session** |
+# Core Principles
+- **Simplicity First**: Make every change as simple as possible. Impact minimal code.
+- **No Laziness**: Find root causes. No temporary fixes. Senior developer standards.
+- **Minimal Impact**: Changes should only touch what's necessary. Avoid introducing bugs.

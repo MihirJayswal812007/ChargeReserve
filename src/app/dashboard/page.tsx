@@ -13,10 +13,8 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.userId },
-    select: { isPremium: true, premiumExpiresAt: true }
-  });
+  // TODO: Add isPremium and premiumExpiresAt to User model in prisma schema
+  const dbUser = { isPremium: false, premiumExpiresAt: null };
 
   const [allBookings, vehicles] = await Promise.all([
     prisma.booking.findMany({
