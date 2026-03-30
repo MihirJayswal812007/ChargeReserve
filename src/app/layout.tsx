@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { getUserFromToken } from "@/lib/auth";
@@ -47,6 +48,7 @@ export default async function RootLayout({
               className: "dark:bg-[#111] dark:border-white/10 dark:text-white bg-white border-black/10 text-black",
             }}
           />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
